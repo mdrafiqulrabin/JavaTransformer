@@ -40,6 +40,7 @@ public class ASTExplorer implements Callable<Void> {
                 new BooleanExchange().inspectSourceCode(javaFile);
                 new LoopExchange().inspectSourceCode(javaFile);
                 new SwitchConditional().inspectSourceCode(javaFile);
+                new ReorderCondition().inspectSourceCode(javaFile);
                 new PermuteStatement().inspectSourceCode(javaFile);
                 new UnusedStatement().inspectSourceCode(javaFile);
                 new LogStatement().inspectSourceCode(javaFile);

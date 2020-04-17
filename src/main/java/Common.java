@@ -89,6 +89,8 @@ public final class Common {
                 newCom = ((LoopExchange) obj).applyTransformation(com, node);
             } else if (obj instanceof SwitchConditional) {
                 newCom = ((SwitchConditional) obj).applyTransformation(com, node);
+            } else if (obj instanceof ReorderCondition) {
+                newCom = ((ReorderCondition) obj).applyTransformation(com, node);
             } else if (obj instanceof PermuteStatement) {
                 newCom = ((PermuteStatement) obj).applyTransformation(com, node);
             } else if (obj instanceof UnusedStatement) {
@@ -168,6 +170,8 @@ public final class Common {
         return (obj instanceof RenameVariable
                 || obj instanceof BooleanExchange
                 || obj instanceof LoopExchange
-                || obj instanceof SwitchConditional);
+                || obj instanceof SwitchConditional
+                || obj instanceof ReorderCondition
+        );
     }
 }
