@@ -12,13 +12,13 @@ import java.io.File;
 import java.util.ArrayList;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class RenameVariable extends VoidVisitorAdapter<Object> {
+public class VariableRenaming extends VoidVisitorAdapter<Object> {
     private File mJavaFile = null;
     private int mVariableCounter = 0;
     private ArrayList<Node> mVariableNodes = new ArrayList<>();
 
-    RenameVariable() {
-        //System.out.println("\n[ RenameVariable ]\n");
+    VariableRenaming() {
+        //System.out.println("\n[ VariableRenaming ]\n");
     }
 
     public void inspectSourceCode(File javaFile) {

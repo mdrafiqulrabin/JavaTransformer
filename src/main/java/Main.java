@@ -7,8 +7,14 @@ public class Main {
          * separate folder for each refactoring will be created in 'transforms' folder
          */
 
-        String inpPath = args[0];
-        String outPath = args[1];
+        String inpPath = "/Users/rabin/Desktop/RA/DummyData/java/methods/";
+        String outPath = "/Users/rabin/Desktop/RA/DummyData/java/transforms/";
+
+        if (args.length == 2) {
+            inpPath = args[0];
+            outPath = args[1];
+        }
+
         new ASTExplorer(inpPath,outPath).call();
     }
 }

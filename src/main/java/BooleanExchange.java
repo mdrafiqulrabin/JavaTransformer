@@ -70,7 +70,7 @@ public class BooleanExchange extends VoidVisitorAdapter<Object> {
                             if (parNode.getValue().toString().equals(bolNode.toString())) {
                                 // i.e. y = x; -> y = !x;
                                 parNode.setValue(StaticJavaParser.parseExpression(getNotExpStr(parNode.getValue())));
-                            } else if (parNode.getTarget().toString().equals(bolNode.toString())){
+                            } else if (parNode.getTarget().toString().equals(bolNode.toString())) {
                                 // i.e. x = r() && x; -> x = !(r() && !x);
                                 new TreeVisitor() {
                                     @Override
@@ -78,7 +78,7 @@ public class BooleanExchange extends VoidVisitorAdapter<Object> {
                                         if (node != null && node.toString().equals(bolNode.toString())) {
                                             if (node.getParentNode().orElse(null) instanceof UnaryExpr) {
                                                 node.getParentNode().orElse(null).replace(node);
-                                            } else if (node instanceof NameExpr){
+                                            } else if (node instanceof NameExpr) {
                                                 ((NameExpr) node).setName(getNotExpStr(node));
                                             }
                                         }
@@ -105,7 +105,7 @@ public class BooleanExchange extends VoidVisitorAdapter<Object> {
 
     private String getNotExpStr(Node node) {
         if (node instanceof BooleanLiteralExpr) {
-            boolean val = !((BooleanLiteralExpr)node).getValue();
+            boolean val = !((BooleanLiteralExpr) node).getValue();
             return String.valueOf(val);
         } else {
             String expStr = "!";

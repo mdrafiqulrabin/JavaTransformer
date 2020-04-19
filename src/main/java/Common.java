@@ -19,8 +19,10 @@ public final class Common {
     static String mRootOutputPath = "";
     static String mSavePath = "";
 
-    static final DataKey<Integer> VariableId = new DataKey<Integer>() {};
-    static final DataKey<String> VariableName = new DataKey<String>() {};
+    static final DataKey<Integer> VariableId = new DataKey<Integer>() {
+    };
+    static final DataKey<String> VariableName = new DataKey<String>() {
+    };
 
     static ArrayList<Path> getFilePaths(String rootPath) {
         ArrayList<Path> listOfPaths = new ArrayList<>();
@@ -40,14 +42,15 @@ public final class Common {
     static void setOutputPath(Object obj, File javaFile) {
         //assume '/transforms' in output path
         Common.mSavePath = Common.mRootOutputPath.replace("/transforms",
-                "/transforms/"+obj.getClass().getSimpleName());
+                "/transforms/" + obj.getClass().getSimpleName());
     }
 
     static CompilationUnit getParseUnit(File javaFile) {
         CompilationUnit root = null;
         try {
+            StaticJavaParser.getConfiguration().setAttributeComments(false);
             String txtCode = new String(Files.readAllBytes(javaFile.toPath()));
-            if(!txtCode.startsWith("class")) txtCode = "class T { \n" + txtCode + "\n}";
+            if (!txtCode.startsWith("class")) txtCode = "class T { \n" + txtCode + "\n}";
             root = StaticJavaParser.parse(txtCode);
         } catch (Exception ex) {
             System.out.println("\n" + "Exception: " + javaFile.getPath());
@@ -64,7 +67,7 @@ public final class Common {
             Node node = nodeList.get(i);
             CompilationUnit newCom = applyByObj(obj, javaFile, com.clone(), node.clone());
             if (newCom != null && Common.checkTransformation(com, newCom, javaFile, false)) {
-                Common.saveTransformation(newCom, javaFile, String.valueOf(i+1));
+                Common.saveTransformation(newCom, javaFile, String.valueOf(i + 1));
             }
         }
 
@@ -81,14 +84,14 @@ public final class Common {
     static CompilationUnit applyByObj(Object obj, File javaFile, CompilationUnit com, Node node) {
         CompilationUnit newCom = null;
         try {
-            if (obj instanceof RenameVariable) {
-                newCom = ((RenameVariable) obj).applyTransformation(com, node);
+            if (obj instanceof VariableRenaming) {
+                newCom = ((VariableRenaming) obj).applyTransformation(com, node);
             } else if (obj instanceof BooleanExchange) {
                 newCom = ((BooleanExchange) obj).applyTransformation(com, node);
             } else if (obj instanceof LoopExchange) {
                 newCom = ((LoopExchange) obj).applyTransformation(com, node);
-            } else if (obj instanceof SwitchConditional) {
-                newCom = ((SwitchConditional) obj).applyTransformation(com, node);
+            } else if (obj instanceof SwitchToIf) {
+                newCom = ((SwitchToIf) obj).applyTransformation(com, node);
             } else if (obj instanceof ReorderCondition) {
                 newCom = ((ReorderCondition) obj).applyTransformation(com, node);
             } else if (obj instanceof PermuteStatement) {
@@ -167,10 +170,10 @@ public final class Common {
     }
 
     static boolean isAllPlaceApplicable(Object obj) {
-        return (obj instanceof RenameVariable
+        return (obj instanceof VariableRenaming
                 || obj instanceof BooleanExchange
                 || obj instanceof LoopExchange
-                || obj instanceof SwitchConditional
+                || obj instanceof SwitchToIf
                 || obj instanceof ReorderCondition
         );
     }

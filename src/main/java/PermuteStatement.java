@@ -77,8 +77,8 @@ public class PermuteStatement extends VoidVisitorAdapter<Object> {
                         if (ijIdentifiers.size() == 0) { //dependency check between i & j statement
                             List<SimpleName> bIdentifiers = new ArrayList<>();
                             for (int b = i + 1; b < j; b++) {
-                                Statement stmtb = (Statement) basicBlockNodes.get(b);
-                                bIdentifiers.addAll(stmtb.findAll(SimpleName.class));
+                                Statement stmt_b = (Statement) basicBlockNodes.get(b);
+                                bIdentifiers.addAll(stmt_b.findAll(SimpleName.class));
                             }
                             List<SimpleName> ibIdentifiers = iIdentifiers.stream()
                                     .filter(bIdentifiers::contains).collect(Collectors.toList());

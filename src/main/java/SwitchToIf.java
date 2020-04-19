@@ -10,12 +10,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class SwitchConditional extends VoidVisitorAdapter<Object> {
+public class SwitchToIf extends VoidVisitorAdapter<Object> {
     private File mJavaFile = null;
     private ArrayList<Node> mSwitchNodes = new ArrayList<>();
 
-    SwitchConditional() {
-        //System.out.println("\n[ SwitchConditional ]\n");
+    SwitchToIf() {
+        //System.out.println("\n[ SwitchToIf ]\n");
     }
 
     public void inspectSourceCode(File javaFile) {

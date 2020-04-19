@@ -34,12 +34,13 @@ public class ASTExplorer implements Callable<Void> {
         );
         System.out.println(input_dir + " : " + javaFiles.size());
 
+        //TODO: parallel transformation
         javaFiles.forEach((javaFile) -> {
             try {
-                new RenameVariable().inspectSourceCode(javaFile);
+                new VariableRenaming().inspectSourceCode(javaFile);
                 new BooleanExchange().inspectSourceCode(javaFile);
                 new LoopExchange().inspectSourceCode(javaFile);
-                new SwitchConditional().inspectSourceCode(javaFile);
+                new SwitchToIf().inspectSourceCode(javaFile);
                 new ReorderCondition().inspectSourceCode(javaFile);
                 new PermuteStatement().inspectSourceCode(javaFile);
                 new UnusedStatement().inspectSourceCode(javaFile);

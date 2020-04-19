@@ -9,7 +9,6 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class LogStatement extends VoidVisitorAdapter<Object> {
