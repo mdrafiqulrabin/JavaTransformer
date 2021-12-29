@@ -1,5 +1,5 @@
 # JavaTransformer
-A tool to apply program transformations to Java methods, that generates new adversarial programs by inducing small (semantic-preserving) changes to original input programs.
+A tool to apply program transformations on Java **(\*.java)** methods for generating semantic adversarial input programs.
 - - -
 
 # Version:
@@ -39,3 +39,9 @@ $ ant jar
 - TryCatch
 - UnusedStatement
 - VariableRenaming
+
+# References:
+
+- Testing Neural Program Analyzers [[Paper](https://arxiv.org/abs/1908.10711)] [[GitHub](https://github.com/mdrafiqulrabin/tnpa-framework)]
+- On the generalizability of Neural Program Models with respect to semantic-preserving program transformations [[Paper](https://arxiv.org/abs/2008.01566)] [[GitHub](https://github.com/mdrafiqulrabin/tnpa-generalizability)]
+- JavaParser: https://github.com/javaparser/javaparser
