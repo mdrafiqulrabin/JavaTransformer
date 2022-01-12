@@ -1,5 +1,5 @@
 # JavaTransformer
-A tool to apply program transformations on Java **(\*.java)** methods for generating semantic adversarial input programs.
+A tool to apply program transformations on Java methods for generating semantic adversarial input programs.
 - - -
 
 # Version:
@@ -24,9 +24,10 @@ $ ant jar
 - Given input and output path, execute jar:
   ```
   # input_path  = Input directory to the original programs.
-  # output_path = Output directory to the augmented programs.
-  $ java -jar JavaAugmentation.jar "input_path" "output_path"
+  # output_path = Output directory to the transformed programs.
+  $ java -jar JavaTransformer.jar "input_path" "output_path"
   ```
+  Note: The scope of transformation is at the method level, so each **(\*.java)** file should contain only a single method. To modify the scope, first check [getParseUnit](https://github.com/mdrafiqulrabin/JavaTransformer/blob/31bab80927b9b86de0650cc1c0f659edae89ebdc/src/main/java/Common.java#L48) for CompilationUnit.
 
 ## Transformations:
 
