@@ -27,7 +27,10 @@ $ ant jar
   # output_path = Output directory to the transformed programs.
   $ java -jar JavaTransformer.jar "input_path" "output_path"
   ```
-  Note: The scope of transformation is at the method level, so each **(\*.java)** file should contain only a single method. To modify the scope, first check [getParseUnit](https://github.com/mdrafiqulrabin/JavaTransformer/blob/31bab80927b9b86de0650cc1c0f659edae89ebdc/src/main/java/Common.java#L48) for CompilationUnit.
+  Note:  
+  > The scope of transformation is at the method level, so each **(\*.java)** file should contain only a single method.  
+  > To modify the scope, first check [getParseUnit](https://github.com/mdrafiqulrabin/JavaTransformer/blob/31bab80927b9b86de0650cc1c0f659edae89ebdc/src/main/java/Common.java#L48) for CompilationUnit.  
+  > Or, convert java files into single method-only files using [JavaMethodExtractor](https://github.com/mdrafiqulrabin/tnpa-generalizability/tree/master/JavaMethodExtractor) before applying transformation.
 
 ## Transformations:
 
