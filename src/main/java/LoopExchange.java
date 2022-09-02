@@ -12,19 +12,21 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.util.ArrayList;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class LoopExchange extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private ArrayList<Node> mLoopNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mLoopNodes = new ArrayList<>();
 
     LoopExchange() {
         //System.out.println("\n[ LoopExchange ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -32,12 +34,12 @@ public class LoopExchange extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        locateLoops(com, obj);
-        Common.applyToPlace(this, com, mJavaFile, mLoopNodes);
+        locateLoops(com);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mLoopNodes);
         super.visit(com, obj);
     }
 
-    private void locateLoops(CompilationUnit com, Object obj) {
+    private void locateLoops(CompilationUnit com) {
         new TreeVisitor() {
             @Override
             public void process(Node node) {

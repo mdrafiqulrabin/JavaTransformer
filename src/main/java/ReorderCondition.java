@@ -7,19 +7,21 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.util.ArrayList;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class ReorderCondition extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private ArrayList<Node> mOperatorNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mOperatorNodes = new ArrayList<>();
 
     ReorderCondition() {
         //System.out.println("\n[ ReorderCondition ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -27,12 +29,12 @@ public class ReorderCondition extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        locateOperators(com, obj);
-        Common.applyToPlace(this, com, mJavaFile, mOperatorNodes);
+        locateOperators(com);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mOperatorNodes);
         super.visit(com, obj);
     }
 
-    private void locateOperators(CompilationUnit com, Object obj) {
+    private void locateOperators(CompilationUnit com) {
         new TreeVisitor() {
             @Override
             public void process(Node node) {

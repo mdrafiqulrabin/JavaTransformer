@@ -9,19 +9,21 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.util.ArrayList;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class SwitchToIf extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private ArrayList<Node> mSwitchNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mSwitchNodes = new ArrayList<>();
 
     SwitchToIf() {
         //System.out.println("\n[ SwitchToIf ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -29,12 +31,12 @@ public class SwitchToIf extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        locateConditionals(com, obj);
-        Common.applyToPlace(this, com, mJavaFile, mSwitchNodes);
+        locateConditionals(com);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mSwitchNodes);
         super.visit(com, obj);
     }
 
-    private void locateConditionals(CompilationUnit com, Object obj) {
+    private void locateConditionals(CompilationUnit com) {
         new TreeVisitor() {
             @Override
             public void process(Node node) {

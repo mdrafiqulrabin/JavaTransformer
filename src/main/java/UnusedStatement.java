@@ -8,23 +8,24 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Random;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class UnusedStatement extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private ArrayList<Node> mDummyNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mDummyNodes = new ArrayList<>();
 
     UnusedStatement() {
         //System.out.println("\n[ UnusedStatement ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -33,20 +34,21 @@ public class UnusedStatement extends VoidVisitorAdapter<Object> {
     @Override
     public void visit(CompilationUnit com, Object obj) {
         mDummyNodes.add(new EmptyStmt());
-        Common.applyToPlace(this, com, mJavaFile, mDummyNodes);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mDummyNodes);
         super.visit(com, obj);
     }
 
-    public CompilationUnit applyTransformation(CompilationUnit com, Node unused) {
-        BlockStmt blockStmt = new BlockStmt();
-        for (Statement statement : com.findFirst(MethodDeclaration.class)
-                .flatMap(MethodDeclaration::getBody).get().getStatements()) {
-            blockStmt.addStatement(statement);
-        }
-        int min = 0, max = blockStmt.getStatements().size() - 1;
-        int place = new Random().nextInt(max - min + 1) + min;
-        blockStmt.addStatement(place, getUnusedStatement());
-        if (com.findFirst(MethodDeclaration.class).isPresent()) {
+    public CompilationUnit applyTransformation(CompilationUnit com) {
+        if (com.findFirst(MethodDeclaration.class).isPresent() &&
+                com.findFirst(MethodDeclaration.class).flatMap(MethodDeclaration::getBody).isPresent()) {
+            BlockStmt blockStmt = new BlockStmt();
+            for (Statement statement : com.findFirst(MethodDeclaration.class)
+                    .flatMap(MethodDeclaration::getBody).get().getStatements()) {
+                blockStmt.addStatement(statement);
+            }
+            int min = 0, max = blockStmt.getStatements().size() - 1;
+            int place = new Random().nextInt(max - min + 1) + min;
+            blockStmt.addStatement(place, getUnusedStatement());
             MethodDeclaration md = com.findFirst(MethodDeclaration.class).get();
             md.setBody(blockStmt);
         }
@@ -54,8 +56,7 @@ public class UnusedStatement extends VoidVisitorAdapter<Object> {
     }
 
     private Statement getUnusedStatement() {
-        String timestamp = new Timestamp(System.currentTimeMillis()).toString();
-        String unusedStr = "String dummy_timestamp = \"" + timestamp + "\";";
+        String unusedStr = "if (false) { temp = 1; }";
         return StaticJavaParser.parseStatement(unusedStr);
     }
 }

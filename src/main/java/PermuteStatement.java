@@ -13,20 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class PermuteStatement extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
+    private String mSavePath = "";
     private ArrayList<ArrayList<Node>> mBasicBlockNodes = new ArrayList<>();
-    private ArrayList<Node> mDummyNodes = new ArrayList<>();
+    private final ArrayList<Node> mDummyNodes = new ArrayList<>();
 
     PermuteStatement() {
         //System.out.println("\n[ PermuteStatement ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -34,34 +36,36 @@ public class PermuteStatement extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        mBasicBlockNodes = locateBasicBlockStatements(com, obj);
+        mBasicBlockNodes = locateBasicBlockStatements(com);
         mDummyNodes.add(new EmptyStmt());
-        Common.applyToPlace(this, com, mJavaFile, mDummyNodes);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mDummyNodes);
         super.visit(com, obj);
     }
 
-    private ArrayList<ArrayList<Node>> locateBasicBlockStatements(CompilationUnit com, Object obj) {
+    private ArrayList<ArrayList<Node>> locateBasicBlockStatements(CompilationUnit com) {
         ArrayList<Node> innerStatementNodes = new ArrayList<>();
         ArrayList<ArrayList<Node>> basicBlockNodes = new ArrayList<>();
         new TreeVisitor() {
             @Override
             public void process(Node node) {
-                if (node instanceof ExpressionStmt
-                        && node.findAll(MethodCallExpr.class).size() == 0
-                        && !Common.isNotPermeableStatement(node)) {
-                    innerStatementNodes.add(node);
-                } else {
-                    if (innerStatementNodes.size() > 1) {
-                        basicBlockNodes.add(new ArrayList<>(innerStatementNodes));
+                if (node instanceof Statement) {
+                    if (node instanceof ExpressionStmt
+                            && node.findAll(MethodCallExpr.class).size() == 0
+                            && !mCommon.isNotPermeableStatement(node)) {
+                        innerStatementNodes.add(node);
+                    } else {
+                        if (innerStatementNodes.size() > 1) {
+                            basicBlockNodes.add(new ArrayList<>(innerStatementNodes));
+                        }
+                        innerStatementNodes.clear();
                     }
-                    innerStatementNodes.clear();
                 }
             }
         }.visitBreadthFirst(com);
         return basicBlockNodes;
     }
 
-    public CompilationUnit applyTransformation(CompilationUnit com, Node unused) {
+    public CompilationUnit applyTransformation(CompilationUnit com) {
         int cnt = 0;
         for (int k = 0; k < mBasicBlockNodes.size(); k++) {
             ArrayList<Node> basicBlockNodes = mBasicBlockNodes.get(k);
@@ -99,12 +103,12 @@ public class PermuteStatement extends VoidVisitorAdapter<Object> {
 
     private void swapStatementNodes(CompilationUnit com, int k, int i, int j, int cnt) {
         CompilationUnit newCom = com.clone();
-        ArrayList<ArrayList<Node>> statementNodes = locateBasicBlockStatements(newCom, null);
+        ArrayList<ArrayList<Node>> statementNodes = locateBasicBlockStatements(newCom);
         Statement stmt_i = (Statement) statementNodes.get(k).get(i);
         Statement stmt_j = (Statement) statementNodes.get(k).get(j);
         stmt_i.replace(stmt_j.clone());
         stmt_j.replace(stmt_i.clone());
-        Common.saveTransformation(newCom, mJavaFile, String.valueOf(cnt));
+        mCommon.saveTransformation(mSavePath, newCom, mJavaFile, String.valueOf(cnt));
     }
 
 }

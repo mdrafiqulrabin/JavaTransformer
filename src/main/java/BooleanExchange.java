@@ -12,19 +12,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class BooleanExchange extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private ArrayList<Node> mBooleanNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mBooleanNodes = new ArrayList<>();
 
     BooleanExchange() {
         //System.out.println("\n[ BooleanExchange ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -32,16 +34,16 @@ public class BooleanExchange extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        locateBooleanVariables(com, obj);
-        Common.applyToPlace(this, com, mJavaFile, mBooleanNodes);
+        locateBooleanVariables(com);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mBooleanNodes);
         super.visit(com, obj);
     }
 
-    private void locateBooleanVariables(CompilationUnit com, Object obj) {
+    private void locateBooleanVariables(CompilationUnit com) {
         new TreeVisitor() {
             @Override
             public void process(Node node) {
-                Node booleanNode = getBooleanVariable(node, com);
+                Node booleanNode = getBooleanVariable(node);
                 if (booleanNode != null) {
                     mBooleanNodes.add(booleanNode);
                 }
@@ -118,7 +120,7 @@ public class BooleanExchange extends VoidVisitorAdapter<Object> {
         }
     }
 
-    private Node getBooleanVariable(Node node, CompilationUnit com) {
+    private Node getBooleanVariable(Node node) {
         if (node.toString().equalsIgnoreCase(PrimitiveType.booleanType().asString())
                 && node.getParentNode().orElse(null) instanceof VariableDeclarator) {
             VariableDeclarator parentNode = (VariableDeclarator) node.getParentNode().get();

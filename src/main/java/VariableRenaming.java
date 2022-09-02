@@ -11,20 +11,22 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.util.ArrayList;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class VariableRenaming extends VoidVisitorAdapter<Object> {
+    private final Common mCommon;
     private File mJavaFile = null;
-    private int mVariableCounter = 0;
-    private ArrayList<Node> mVariableNodes = new ArrayList<>();
+    private String mSavePath = "";
+    private final ArrayList<Node> mVariableNodes = new ArrayList<>();
+    private String mNewVariableName = "";
 
     VariableRenaming() {
         //System.out.println("\n[ VariableRenaming ]\n");
+        mCommon = new Common();
     }
 
     public void inspectSourceCode(File javaFile) {
         this.mJavaFile = javaFile;
-        Common.setOutputPath(this, mJavaFile);
-        CompilationUnit root = Common.getParseUnit(mJavaFile);
+        mSavePath = Common.mRootOutputPath + this.getClass().getSimpleName() + "/";
+        CompilationUnit root = mCommon.getParseUnit(mJavaFile);
         if (root != null) {
             this.visit(root.clone(), null);
         }
@@ -32,26 +34,30 @@ public class VariableRenaming extends VoidVisitorAdapter<Object> {
 
     @Override
     public void visit(CompilationUnit com, Object obj) {
-        locateVariableRenaming(com, obj);
-        Common.applyToPlace(this, com, mJavaFile, mVariableNodes);
+        locateVariableRenaming(com);
+        mCommon.applyToPlace(this, mSavePath, com, mJavaFile, mVariableNodes);
         super.visit(com, obj);
     }
 
-    private void locateVariableRenaming(CompilationUnit com, Object obj) {
+    private void locateVariableRenaming(CompilationUnit com) {
+        final int[] variableId = {0};
+        mNewVariableName = "var";
         new TreeVisitor() {
             @Override
             public void process(Node node) {
-                if (isTargetVariable(node, com)) {
-                    node.setData(Common.VariableId, mVariableCounter++);
-                    node.setData(Common.VariableName, node.toString());
+                if (isTargetVariable(node)) {
                     mVariableNodes.add(node);
+                    if (node.toString().equals(mNewVariableName)) {
+                        variableId[0]++;
+                        mNewVariableName = "var" + variableId[0];
+                    }
                 }
             }
         }.visitPreOrder(com);
         //System.out.println("TargetVariable : " + mVariableList);
     }
 
-    private boolean isTargetVariable(Node node, CompilationUnit com) {
+    private boolean isTargetVariable(Node node) {
         return (node instanceof SimpleName &&
                 (node.getParentNode().orElse(null) instanceof Parameter
                         || node.getParentNode().orElse(null) instanceof VariableDeclarator));
@@ -61,13 +67,12 @@ public class VariableRenaming extends VoidVisitorAdapter<Object> {
         new TreeVisitor() {
             @Override
             public void process(Node node) {
-                String oldName = varNode.getData(Common.VariableName);
+                String oldName = varNode.toString();
                 if (node.toString().equals(oldName)) {
-                    String newName = "var" + varNode.getData(Common.VariableId);
                     if (node instanceof SimpleName
                             && !(node.getParentNode().orElse(null) instanceof MethodDeclaration)
                             && !(node.getParentNode().orElse(null) instanceof ClassOrInterfaceDeclaration)) {
-                        ((SimpleName) node).setIdentifier(newName);
+                        ((SimpleName) node).setIdentifier(mNewVariableName);
                     }
                 }
             }
