@@ -1,10 +1,10 @@
 # JavaTransformer
-A tool to apply program transformations on Java methods for generating semantic adversarial input programs.
+A tool to apply program transformations on Java **(\*.java)** methods for generating semantic adversarial input programs.
 - - -
 
-# Version:
-- Python 3.7.4
-- javaparser 3.14.5
+# Version(s):
+- Python 3.7.3,3.8.10
+- javaparser 3.24.4
 
 # JavaTransformer.jar:
 
