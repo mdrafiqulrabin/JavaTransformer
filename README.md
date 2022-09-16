@@ -1,9 +1,9 @@
 # JavaTransformer
-A tool to apply program transformations on Java **(\*.java)** methods for generating semantic adversarial input programs.
+A tool to apply program transformations on Java **(\*.java)** methods for generating semantic-preserving transformed programs.
 - - -
 
-# Version(s):
-- Python 3.7.3,3.8.10
+# Used Version(s):
+- openjdk 1.8.0_222
 - javaparser 3.24.4
 
 # JavaTransformer.jar:
